@@ -556,12 +556,16 @@
         </div>
 
         <div class="focus-controls">
-            <button class="focus-btn" id="focusMuteBtn" onclick="toggleMusic()">🔊 Mute</button>
+            <button class="focus-btn" id="focusMuteBtn" onclick="toggleMusic()">🔇 Mute</button>
             <button class="focus-btn" onclick="stopTimer()">⏸ Pause</button>
         </div>
 
+        <!-- Poprawiony kontener YouTube ze zweryfikowanymi uprawnieniami autoplay -->
         <div style="display: none;">
-            <div id="youtubePlayer"></div>
+            <iframe id="youtubePlayer" 
+                    src="https://www.youtube.com/embed/rFZHOHl-L8A?enablejsapi=1&autoplay=0&controls=0" 
+                    allow="autoplay">
+            </iframe>
         </div>
 
         <div class="stats-grid hide-on-focus">
@@ -598,16 +602,14 @@
 
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('youtubePlayer', {
-                height: '0',
-                width: '0',
-                videoId: 'rFZHOHl-L8A',
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 0,
-                    'enablejsapi': 1,
-                    'origin': window.location.origin
+                events: {
+                    'onReady': onPlayerReady
                 }
             });
+        }
+
+        function onPlayerReady(event) {
+            // Player jest gotowy do użycia
         }
 
         let globalMinutes = parseInt(localStorage.getItem('totalStudiedMinutes')) || 0;
@@ -641,7 +643,11 @@
             document.body.classList.add('focus-mode');
 
             if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isUserMuted) {
-                ytPlayer.playVideo();
+                try {
+                    ytPlayer.playVideo();
+                } catch(e) {
+                    console.log("YouTube Playback error:", e);
+                }
             }
 
             timerInterval = setInterval(() => {
@@ -672,8 +678,8 @@
 
             document.body.classList.remove('focus-mode');
 
-            if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-                ytPlayer.stopVideo();
+            if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+                ytPlayer.pauseVideo();
             }
 
             window.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -711,13 +717,13 @@
             const muteBtn = document.getElementById('focusMuteBtn');
             
             if (isUserMuted) {
-                muteBtn.textContent = '🔇 Unmute';
+                muteBtn.textContent = '🔊 Unmute';
                 muteBtn.classList.add('muted');
-                if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-                    ytPlayer.stopVideo();
+                if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+                    ytPlayer.pauseVideo();
                 }
             } else {
-                muteBtn.textContent = '🔊 Mute';
+                muteBtn.textContent = '🔇 Mute';
                 muteBtn.classList.remove('muted');
                 if (isRunning && ytPlayer && typeof ytPlayer.playVideo === 'function') {
                     ytPlayer.playVideo();
@@ -817,7 +823,7 @@
                 if (isStrictModeOn) {
                     playLoudAlarm();
                     showWarningModal();
-                    document.title = '😾 Cat is angry at you!';
+                    document.title = '🙀 Cat is angry at you!';
                 }
                 document.getElementById('focusBanner').classList.add('show');
             } else {
