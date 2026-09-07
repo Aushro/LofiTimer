@@ -560,7 +560,6 @@
             <button class="focus-btn" onclick="stopTimer()">⏸ Pause</button>
         </div>
 
-        <!-- Poprawiony kontener YouTube ze zweryfikowanymi uprawnieniami autoplay -->
         <div style="display: none;">
             <iframe id="youtubePlayer" 
                     src="https://www.youtube.com/embed/rFZHOHl-L8A?enablejsapi=1&autoplay=0&controls=0" 
@@ -627,6 +626,8 @@
                 if (!isHiddenAndStrict) {
                     document.title = `(${timeString}) Focus Timer`;
                 }
+            } else if (remainingSeconds <= 0) {
+                document.title = '00:00 - Cat is Proud!';
             } else {
                 document.title = 'Focus Timer - Study Hard, Stay Focused';
             }
@@ -705,7 +706,8 @@
 
             stopTimer();
             playLoudAlarm();
-            showWarningModal();
+            
+            // Usunięto wywołanie showWarningModal(), które uruchamiało pop-up o złości kota.
             document.getElementById('timerDisplay').textContent = '00:00';
             document.getElementById('timerLabel').textContent = 'Session Complete!';
             document.title = '00:00 - Cat is Proud!';
